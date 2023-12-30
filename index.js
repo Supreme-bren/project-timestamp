@@ -33,26 +33,24 @@ var listener = app.listen(process.env.PORT, function () {
 
 
 let resObject ={};
+let isInvalidDate = (date) => date.toUTCString() === 'Invalid Date'
 
 app.get('/api/:date', (req, res) =>{
-  let date = req.params.date;
-  if(date.includes('-')){
-    resObject['unix'] = new Date(date).getTime();
-    resObject['utc'] = new Date(date).toUTCString();
+  let date = new Date(req.params.date);
+  if(isInvalidDate(date)){
+    date = new Date(+req.params.date)
   }
-  else{
-    date = parseInt(date);
-    resObject['unix'] = new Date(date).getTime();
-    resObject['utc'] = new Date(date).toUTCString();
-  }
-  if(!resObject['unix'] || !resObject['utc']){
+  if(isInvalidDate(date)){
     res.json({error: 'Invalid Date'})
+    return;
 
   }
+  resObject['unix'] = date.getTime();
+  resObject['utc'] = date.toUTCString();
   res.json(resObject);
 })
 
-app.get('/api', (req, res) =>{
+app.get('/api/?', (req, res) =>{
   resObject['unix'] = new Date().getTime();
   resObject['utc'] = new Date().toUTCString();
   res.json(resObject);
